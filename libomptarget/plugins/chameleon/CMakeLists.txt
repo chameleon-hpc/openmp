@@ -21,7 +21,7 @@ libomptarget_say("Building Chameleon offloading plugin.")
 
 set(tmachine_name "chameleon")
 set(tmachine_libname "chameleon")
-set(tmachine_triple "chameleon-unknown-unknown-unknown")
+set(tmachine_triple "chameleon-pc-linux-gnu")
 
 # Define the suffix for the runtime messaging dumps.
 add_definitions("-DTARGET_NAME=${tmachine_name}")

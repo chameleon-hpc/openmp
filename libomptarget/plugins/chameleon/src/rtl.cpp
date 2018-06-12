@@ -334,6 +334,7 @@ int32_t __tgt_rtl_run_target_team_region(int32_t device_id, void *tgt_entry_ptr,
 int32_t __tgt_rtl_run_target_region(int32_t device_id, void *tgt_entry_ptr,
     void **tgt_args, ptrdiff_t *tgt_offsets, int32_t arg_num) {
   // use one team and one thread.
+  DP("CHAMELEON running target region\n");
   return __tgt_rtl_run_target_team_region(device_id, tgt_entry_ptr, tgt_args,
       tgt_offsets, arg_num, 1, 1, 0);
 }
