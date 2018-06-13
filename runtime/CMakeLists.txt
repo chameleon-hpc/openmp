@@ -49,6 +49,8 @@ else() # Part of LLVM build
     set(LIBOMP_ARCH x86_64)
   elseif(LIBOMP_NATIVE_ARCH STREQUAL "x86_64")
     set(LIBOMP_ARCH x86_64)
+  elseif(LIBOMP_NATIVE_ARCH STREQUAL "chameleon")
+    set(LIBOMP_ARCH chameleon)
   elseif(LIBOMP_NATIVE_ARCH MATCHES "powerpc64le")
     set(LIBOMP_ARCH ppc64le)
   elseif(LIBOMP_NATIVE_ARCH MATCHES "powerpc")
