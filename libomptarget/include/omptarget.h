@@ -189,8 +189,8 @@ void __kmpc_push_target_tripcount(int64_t device_id, uint64_t loop_tripcount);
 #include <stdio.h>
 #define DEBUGP(prefix, ...)                                                    \
   {                                                                            \
-    fprintf(stderr, "%s --> ", prefix);                                        \
-    fprintf(stderr, __VA_ARGS__);                                              \
+    fprintf(stdout, "%s --> ", prefix);                                        \
+    fprintf(stdout, __VA_ARGS__);                                              \
   }
 
 #ifndef __STDC_FORMAT_MACROS
