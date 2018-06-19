@@ -26,9 +26,14 @@
 static const char *RTLNames[] = {
     /* PowerPC target   */ "libomptarget.rtl.ppc64.so",
     /* Chameleon target */ "libomptarget.rtl.chameleon.so",
-    /* x86_64 target    */ "libomptarget.rtl.x86_64.so",
+    /* x86_64 target     "libomptarget.rtl.x86_64.so", */ // do not use x86 plugin because chameleon support host and MPI, controled via device number
     /* CUDA target      */ "libomptarget.rtl.cuda.so",
     /* AArch64 target   */ "libomptarget.rtl.aarch64.so"};
+
+enum SpecialDeviceIds {
+  CHAMELEON_HOST = 1001,
+  CHAMELEON_DEV = 1002,
+};
 
 RTLsTy RTLs;
 std::mutex RTLsMtx;
@@ -55,22 +60,22 @@ void RTLsTy::LoadRTLs() {
 
   DP("Loading RTLs...\n");
 
-  char *chameleon_val = getenv("OMP_TARGET_ENABLE_CHAMELEON");
-  bool filter_out_chameleon = false;
-  if (chameleon_val && !strcmp(chameleon_val, "1")) {
-    // do not filter out chameleon plugin
-  } else {
-    filter_out_chameleon = true;
-  }
+  // char *chameleon_val = getenv("OMP_TARGET_ENABLE_CHAMELEON");
+  // bool filter_out_chameleon = false;
+  // if (chameleon_val && !strcmp(chameleon_val, "1")) {
+  //   // do not filter out chameleon plugin
+  // } else {
+  //   filter_out_chameleon = true;
+  // }
 
   // Attempt to open all the plugins and, if they exist, check if the interface
   // is correct and if they are supporting any devices.
   for (auto *Name : RTLNames) {
-    std::string tmp_str(Name);
-    if(tmp_str.find("chameleon") != std::string::npos && filter_out_chameleon) {
-      DP("Filtering out chameleon plugin '%s'...\n", Name);
-      continue;
-    }
+    // std::string tmp_str(Name);
+    // if(tmp_str.find("chameleon") != std::string::npos && filter_out_chameleon) {
+    //   DP("Filtering out chameleon plugin '%s'...\n", Name);
+    //   continue;
+    // }
 
     DP("Loading library '%s'...\n", Name);
     void *dynlib_handle = dlopen(Name, RTLD_NOW);
@@ -88,6 +93,10 @@ void RTLsTy::LoadRTLs() {
 
     R.LibraryHandler = dynlib_handle;
     R.isUsed = false;
+
+    if (strcmp(Name, "libomptarget.rtl.chameleon.so") == 0) {
+      R.specialDeviceId = CHAMELEON_HOST;
+    }
 
 #ifdef OMPTARGET_DEBUG
     R.RTLName = Name;

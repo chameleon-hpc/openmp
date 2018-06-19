@@ -39,6 +39,7 @@ EXTERN int omp_get_initial_device(void) {
 EXTERN void *omp_target_alloc(size_t size, int device_num) {
   DP("Call to omp_target_alloc for device %d requesting %zu bytes\n",
       device_num, size);
+  device_num = convert_device_id(device_num);
 
   if (size <= 0) {
     DP("Call to omp_target_alloc with non-positive length\n");
@@ -67,6 +68,7 @@ EXTERN void *omp_target_alloc(size_t size, int device_num) {
 EXTERN void omp_target_free(void *device_ptr, int device_num) {
   DP("Call to omp_target_free for device %d and address " DPxMOD "\n",
       device_num, DPxPTR(device_ptr));
+  device_num = convert_device_id(device_num);
 
   if (!device_ptr) {
     DP("Call to omp_target_free with NULL ptr\n");
@@ -92,6 +94,7 @@ EXTERN void omp_target_free(void *device_ptr, int device_num) {
 EXTERN int omp_target_is_present(void *ptr, int device_num) {
   DP("Call to omp_target_is_present for device %d and address " DPxMOD "\n",
       device_num, DPxPTR(ptr));
+  device_num = convert_device_id(device_num);
 
   if (!ptr) {
     DP("Call to omp_target_is_present with NULL ptr, returning false\n");
@@ -234,6 +237,7 @@ EXTERN int omp_target_associate_ptr(void *host_ptr, void *device_ptr,
   DP("Call to omp_target_associate_ptr with host_ptr " DPxMOD ", "
       "device_ptr " DPxMOD ", size %zu, device_offset %zu, device_num %d\n",
       DPxPTR(host_ptr), DPxPTR(device_ptr), size, device_offset, device_num);
+  device_num = convert_device_id(device_num);
 
   if (!host_ptr || !device_ptr || size <= 0) {
     DP("Call to omp_target_associate_ptr with invalid arguments\n");
@@ -260,6 +264,7 @@ EXTERN int omp_target_associate_ptr(void *host_ptr, void *device_ptr,
 EXTERN int omp_target_disassociate_ptr(void *host_ptr, int device_num) {
   DP("Call to omp_target_disassociate_ptr with host_ptr " DPxMOD ", "
       "device_num %d\n", DPxPTR(host_ptr), device_num);
+  device_num = convert_device_id(device_num);
 
   if (!host_ptr) {
     DP("Call to omp_target_associate_ptr with invalid host_ptr\n");

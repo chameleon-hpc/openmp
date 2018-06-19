@@ -262,6 +262,7 @@ EXTERN void __tgt_target_data_begin(int64_t device_id, int32_t arg_num,
     void **args_base, void **args, int64_t *arg_sizes, int64_t *arg_types) {
   DP("Entering data begin region for device %ld with %d mappings\n", device_id,
      arg_num);
+  device_id = convert_device_id(device_id);
 
   // No devices available?
   if (device_id == OFFLOAD_DEVICE_DEFAULT) {
@@ -298,6 +299,7 @@ EXTERN void __tgt_target_data_begin_nowait(int64_t device_id, int32_t arg_num,
     void **args_base, void **args, int64_t *arg_sizes, int64_t *arg_types,
     int32_t depNum, void *depList, int32_t noAliasDepNum,
     void *noAliasDepList) {
+  device_id = convert_device_id(device_id);
   if (depNum + noAliasDepNum > 0)
     __kmpc_omp_taskwait(NULL, 0);
 
@@ -311,6 +313,7 @@ EXTERN void __tgt_target_data_begin_nowait(int64_t device_id, int32_t arg_num,
 EXTERN void __tgt_target_data_end(int64_t device_id, int32_t arg_num,
     void **args_base, void **args, int64_t *arg_sizes, int64_t *arg_types) {
   DP("Entering data end region with %d mappings\n", arg_num);
+  device_id = convert_device_id(device_id);
 
   // No devices available?
   if (device_id == OFFLOAD_DEVICE_DEFAULT) {
@@ -353,6 +356,7 @@ EXTERN void __tgt_target_data_end_nowait(int64_t device_id, int32_t arg_num,
     void **args_base, void **args, int64_t *arg_sizes, int64_t *arg_types,
     int32_t depNum, void *depList, int32_t noAliasDepNum,
     void *noAliasDepList) {
+  device_id = convert_device_id(device_id);
   if (depNum + noAliasDepNum > 0)
     __kmpc_omp_taskwait(NULL, 0);
 
@@ -363,6 +367,7 @@ EXTERN void __tgt_target_data_end_nowait(int64_t device_id, int32_t arg_num,
 EXTERN void __tgt_target_data_update(int64_t device_id, int32_t arg_num,
     void **args_base, void **args, int64_t *arg_sizes, int64_t *arg_types) {
   DP("Entering data update with %d mappings\n", arg_num);
+  device_id = convert_device_id(device_id);
 
   // No devices available?
   if (device_id == OFFLOAD_DEVICE_DEFAULT) {
@@ -382,6 +387,7 @@ EXTERN void __tgt_target_data_update_nowait(
     int64_t device_id, int32_t arg_num, void **args_base, void **args,
     int64_t *arg_sizes, int64_t *arg_types, int32_t depNum, void *depList,
     int32_t noAliasDepNum, void *noAliasDepList) {
+  device_id = convert_device_id(device_id);
   if (depNum + noAliasDepNum > 0)
     __kmpc_omp_taskwait(NULL, 0);
 
@@ -393,6 +399,7 @@ EXTERN int __tgt_target(int64_t device_id, void *host_ptr, int32_t arg_num,
     void **args_base, void **args, int64_t *arg_sizes, int64_t *arg_types) {
   DP("Entering target region with entry point " DPxMOD " and device Id %ld\n",
      DPxPTR(host_ptr), device_id);
+  device_id = convert_device_id(device_id);
 
   if (device_id == OFFLOAD_DEVICE_DEFAULT) {
     device_id = omp_get_default_device();
@@ -428,6 +435,7 @@ EXTERN int __tgt_target_nowait(int64_t device_id, void *host_ptr,
     int32_t arg_num, void **args_base, void **args, int64_t *arg_sizes,
     int64_t *arg_types, int32_t depNum, void *depList, int32_t noAliasDepNum,
     void *noAliasDepList) {
+  device_id = convert_device_id(device_id);
   if (depNum + noAliasDepNum > 0)
     __kmpc_omp_taskwait(NULL, 0);
 
@@ -440,6 +448,7 @@ EXTERN int __tgt_target_teams(int64_t device_id, void *host_ptr,
     int64_t *arg_types, int32_t team_num, int32_t thread_limit) {
   DP("Entering target region with entry point " DPxMOD " and device Id %ld\n",
      DPxPTR(host_ptr), device_id);
+  device_id = convert_device_id(device_id);
 
   if (device_id == OFFLOAD_DEVICE_DEFAULT) {
     device_id = omp_get_default_device();
@@ -476,6 +485,7 @@ EXTERN int __tgt_target_teams_nowait(int64_t device_id, void *host_ptr,
     int32_t arg_num, void **args_base, void **args, int64_t *arg_sizes,
     int64_t *arg_types, int32_t team_num, int32_t thread_limit, int32_t depNum,
     void *depList, int32_t noAliasDepNum, void *noAliasDepList) {
+  device_id = convert_device_id(device_id);
   if (depNum + noAliasDepNum > 0)
     __kmpc_omp_taskwait(NULL, 0);
 
@@ -487,6 +497,7 @@ EXTERN int __tgt_target_teams_nowait(int64_t device_id, void *host_ptr,
 // The trip count mechanism will be revised - this scheme is not thread-safe.
 EXTERN void __kmpc_push_target_tripcount(int64_t device_id,
     uint64_t loop_tripcount) {
+  device_id = convert_device_id(device_id);
   if (device_id == OFFLOAD_DEVICE_DEFAULT) {
     device_id = omp_get_default_device();
   }

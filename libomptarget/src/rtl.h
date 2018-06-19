@@ -45,6 +45,8 @@ struct RTLInfoTy {
   int32_t NumberOfDevices;         // Number of devices this RTL deals with.
   std::vector<DeviceTy *> Devices; // one per device (NumberOfDevices in total).
 
+  int32_t specialDeviceId;
+
   void *LibraryHandler;
 
 #ifdef OMPTARGET_DEBUG
@@ -74,7 +76,7 @@ struct RTLInfoTy {
   // The existence of the mutex above makes RTLInfoTy non-copyable.
   // We need to provide a copy constructor explicitly.
   RTLInfoTy()
-      : Idx(-1), NumberOfDevices(-1), Devices(), LibraryHandler(0),
+      : Idx(-1), NumberOfDevices(-1), Devices(), LibraryHandler(0), specialDeviceId(-1),
 #ifdef OMPTARGET_DEBUG
         RTLName(),
 #endif
@@ -102,6 +104,8 @@ struct RTLInfoTy {
     run_region = r.run_region;
     run_team_region = r.run_team_region;
     isUsed = r.isUsed;
+
+    specialDeviceId = r.specialDeviceId;
   }
 };
 
@@ -163,4 +167,15 @@ typedef std::map<void *, TableMap> HostPtrToTableMapTy;
 extern HostPtrToTableMapTy HostPtrToTableMap;
 extern std::mutex TblMapMtx;
 
+//inline int32_t convert_device_id(int device_id);
+// handle special device ids
+inline int32_t convert_device_id(int device_id) {
+  if(device_id == 1001 || device_id == 1002) {
+    for(int i = 0; i < Devices.size(); i++){
+      if (Devices[i].RTL->specialDeviceId == 1001 || Devices[i].RTL->specialDeviceId == 1002)
+        return i + (device_id - 1001);
+    }
+  }
+  return device_id;
+}
 #endif
