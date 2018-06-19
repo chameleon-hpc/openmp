@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#include "chameleon.h"
 #include "omptargetplugin.h"
 
 #ifndef TARGET_NAME
@@ -50,7 +51,7 @@ static int DebugLevel = 0;
 
 #include "../../common/elf_common.c"
 
-#define NUMBER_OF_DEVICES 4
+#define NUMBER_OF_DEVICES 1
 #define OFFLOADSECTIONNAME ".omp_offloading.entries"
 
 /// Array of Dynamic libraries loaded for this target.
@@ -144,7 +145,8 @@ int32_t __tgt_rtl_is_valid_binary(__tgt_device_image *image) {
 
 int32_t __tgt_rtl_number_of_devices() { 
 
-	DP("CHAMELEON!!!\n");
+	DP("CHAMELEON FINALIZE!!!\n");
+  chameleon_finalize();
 	return NUMBER_OF_DEVICES; 
 }
 

@@ -158,3 +158,43 @@ find_package_handle_standard_args(
   LIBOMPTARGET_DEP_CUDA_DRIVER_LIBRARIES)
 
 mark_as_advanced(LIBOMPTARGET_DEP_CUDA_DRIVER_LIBRARIES)
+
+################################################################################
+# Looking for Chameleon library ...
+################################################################################
+
+find_path (
+  LIBOMPTARGET_DEP_CHAMELEON_INCLUDE_DIR
+  NAMES
+    chameleon.h
+  HINTS
+    ${LIBOMPTARGET_SEARCH_CHAMELEON_INCL_DIR}
+  PATHS
+    /usr/include
+    /usr/local/include
+    /opt/local/include
+    /sw/include
+    ENV CPATH)
+
+# Don't bother look for the library if the header files were not found.
+if (LIBOMPTARGET_DEP_CHAMELEON_INCLUDE_DIR)
+  find_library (
+      LIBOMPTARGET_DEP_CHAMELEON_LIBRARY
+    NAMES
+      chameleon
+    PATHS
+      /usr/lib
+      /usr/local/lib
+      /opt/local/lib
+      /sw/lib
+      ENV LIBRARY_PATH
+      ENV LD_LIBRARY_PATH)
+
+else()  
+  set(LIBOMPTARGET_DEP_CHAMELEON_INCLUDE_DIR "")
+  set(LIBOMPTARGET_DEP_CHAMELEON_LIBRARY "")
+endif()
+mark_as_advanced(
+  LIBOMPTARGET_DEP_CHAMELEON_INCLUDE_DIR 
+  LIBOMPTARGET_DEP_CHAMELEON_LIBRARY)
+

@@ -31,9 +31,10 @@ add_definitions("-DTARGET_ELF_ID=62")
 #if(LIBOMPTARGET_CMAKE_BUILD_TYPE MATCHES debug)   
 #endif()
 
-#include_directories(${LIBOMPTARGET_DEP_CHAMELEON_INCLUDE_DIRS})
+include_directories(${LIBOMPTARGET_DEP_CHAMELEON_INCLUDE_DIRS})
 include_directories(${LIBOMPTARGET_DEP_LIBFFI_INCLUDE_DIR})
 include_directories(${LIBOMPTARGET_DEP_LIBELF_INCLUDE_DIRS})
+include_directories(${LIBOMPTARGET_DEP_CHAMELEON_INCLUDE_DIR})
 
 add_library("omptarget.rtl.${tmachine_libname}" SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/rtl.cpp)
 
@@ -44,6 +45,7 @@ target_link_libraries(
   "omptarget.rtl.${tmachine_libname}"
   ${LIBOMPTARGET_DEP_LIBFFI_LIBRARIES} 
   ${LIBOMPTARGET_DEP_LIBELF_LIBRARIES}
+  ${LIBOMPTARGET_DEP_CHAMELEON_LIBRARY}
   dl
   "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/../exports")
 
