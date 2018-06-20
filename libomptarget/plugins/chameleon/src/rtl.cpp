@@ -134,6 +134,52 @@ static RTLDeviceInfoTy DeviceInfo(NUMBER_OF_DEVICES);
 extern "C" {
 #endif
 
+// ========================================== MPI specific functions
+
+void *__tgt_rtl_data_alloc_mpi(int32_t device_id, int64_t size, void *hst_ptr) {
+  // normally we don't need to do anything here because we are focusing on the host pointers when transfering
+  void *ptr = malloc(size);
+  return ptr;
+  //return NULL;
+}
+
+int32_t __tgt_rtl_data_submit_mpi(int32_t device_id, void *tgt_ptr, void *hst_ptr, int64_t size) {
+  // save to chameleon data structure
+  int32_t result = chameleon_submit_data(tgt_ptr, hst_ptr, size);
+  return OFFLOAD_SUCCESS;
+}
+
+int32_t __tgt_rtl_data_retrieve_mpi(int32_t device_id, void *hst_ptr, void *tgt_ptr, int64_t size) {
+  // we don't need to copy anything here at this time because execution and transfering data back again happens later
+  // TODO: mark corresponding host pointer as output
+  return OFFLOAD_SUCCESS;
+}
+
+int32_t __tgt_rtl_data_delete_mpi(int32_t device_id, void *tgt_ptr) {
+  // normally nothing to do here
+  free(tgt_ptr);
+  return OFFLOAD_SUCCESS;
+}
+
+int32_t __tgt_rtl_run_target_team_region_mpi(int32_t device_id, void *tgt_entry_ptr,
+    void **tgt_args, ptrdiff_t *tgt_offsets, int32_t arg_num, int32_t team_num,
+    int32_t thread_limit, uint64_t loop_tripcount /*not used*/) {
+  // ignore team num and thread limit.
+
+  // handle also implicit mapped variables
+  for(int i = 0; i < arg_num; i++) {
+    chameleon_submit_implicit_data(tgt_args[i]);
+  }
+
+  // TODO: create data structure that holds information about offloading job that can be executed locally or remotely
+  // TODO: save data structure in chameleon data structure
+
+  return OFFLOAD_SUCCESS;
+}
+
+
+// ========================================== x86 specific functions / normal interface
+
 int32_t __tgt_rtl_is_valid_binary(__tgt_device_image *image) {
 // If we don't have a valid ELF ID we can just fail.
 #if TARGET_ELF_ID < 1
@@ -144,13 +190,14 @@ int32_t __tgt_rtl_is_valid_binary(__tgt_device_image *image) {
 }
 
 int32_t __tgt_rtl_number_of_devices() { 
-
-	DP("CHAMELEON FINALIZE!!!\n");
+  // dummy call to test if linking worked
   chameleon_finalize();
 	return NUMBER_OF_DEVICES; 
 }
 
-int32_t __tgt_rtl_init_device(int32_t device_id) { return OFFLOAD_SUCCESS; }
+int32_t __tgt_rtl_init_device(int32_t device_id) {
+  return OFFLOAD_SUCCESS; 
+}
 
 __tgt_target_table *__tgt_rtl_load_binary(int32_t device_id,
                                           __tgt_device_image *image) {
@@ -278,23 +325,37 @@ __tgt_target_table *__tgt_rtl_load_binary(int32_t device_id,
 }
 
 void *__tgt_rtl_data_alloc(int32_t device_id, int64_t size, void *hst_ptr) {
+  if(device_id == 1)
+    return __tgt_rtl_data_alloc_mpi(device_id, size, hst_ptr);
+
   void *ptr = malloc(size);
   return ptr;
 }
 
 int32_t __tgt_rtl_data_submit(int32_t device_id, void *tgt_ptr, void *hst_ptr,
                               int64_t size) {
+  DP("CHAMELEON - submitting data... hst_ptr=" DPxMOD " tgt_ptr=" DPxMOD "\n", DPxPTR(hst_ptr), DPxPTR(tgt_ptr));
+  if(device_id == 1)
+    return __tgt_rtl_data_submit_mpi(device_id, tgt_ptr, hst_ptr, size);
+
   memcpy(tgt_ptr, hst_ptr, size);
   return OFFLOAD_SUCCESS;
 }
 
 int32_t __tgt_rtl_data_retrieve(int32_t device_id, void *hst_ptr, void *tgt_ptr,
                                 int64_t size) {
+  DP("CHAMELEON - retrieve data... hst_ptr=" DPxMOD " tgt_ptr=" DPxMOD "\n", DPxPTR(hst_ptr), DPxPTR(tgt_ptr));
+  if(device_id == 1)
+    return __tgt_rtl_data_retrieve_mpi(device_id, hst_ptr, tgt_ptr, size);
+
   memcpy(hst_ptr, tgt_ptr, size);
   return OFFLOAD_SUCCESS;
 }
 
 int32_t __tgt_rtl_data_delete(int32_t device_id, void *tgt_ptr) {
+  if(device_id == 1)
+    return __tgt_rtl_data_delete_mpi(device_id, tgt_ptr);
+
   free(tgt_ptr);
   return OFFLOAD_SUCCESS;
 }
@@ -303,6 +364,16 @@ int32_t __tgt_rtl_run_target_team_region(int32_t device_id, void *tgt_entry_ptr,
     void **tgt_args, ptrdiff_t *tgt_offsets, int32_t arg_num, int32_t team_num,
     int32_t thread_limit, uint64_t loop_tripcount /*not used*/) {
   // ignore team num and thread limit.
+  DP("CHAMELEON - running target region...\n");
+
+  for(int i = 0; i < arg_num; i++) {
+    DP("CHAMELEON - Parameter base=" DPxMOD " converted=" DPxMOD "\n", DPxPTR(tgt_args[i]), DPxPTR((void *)((intptr_t)tgt_args[i] + tgt_offsets[i])));
+  }
+  
+  if(device_id == 1)
+    return __tgt_rtl_run_target_team_region_mpi(device_id, tgt_entry_ptr,
+      tgt_args, tgt_offsets, arg_num, team_num,
+      thread_limit, loop_tripcount);
 
   // Use libffi to launch execution.
   ffi_cif cif;
@@ -336,7 +407,6 @@ int32_t __tgt_rtl_run_target_team_region(int32_t device_id, void *tgt_entry_ptr,
 int32_t __tgt_rtl_run_target_region(int32_t device_id, void *tgt_entry_ptr,
     void **tgt_args, ptrdiff_t *tgt_offsets, int32_t arg_num) {
   // use one team and one thread.
-  DP("CHAMELEON running target region\n");
   return __tgt_rtl_run_target_team_region(device_id, tgt_entry_ptr, tgt_args,
       tgt_offsets, arg_num, 1, 1, 0);
 }
