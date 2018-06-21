@@ -320,16 +320,16 @@ int32_t DeviceTy::data_retrieve(void *HstPtrBegin, void *TgtPtrBegin,
 
 // Run region on device
 int32_t DeviceTy::run_region(void *TgtEntryPtr, void **TgtVarsPtr,
-    ptrdiff_t *TgtOffsets, int32_t TgtVarsSize) {
-  return RTL->run_region(RTLDeviceID, TgtEntryPtr, TgtVarsPtr, TgtOffsets,
+    ptrdiff_t *TgtOffsets, int64_t *TgtArgTypes, int32_t TgtVarsSize) {
+  return RTL->run_region(RTLDeviceID, TgtEntryPtr, TgtVarsPtr, TgtOffsets, TgtArgTypes,
       TgtVarsSize);
 }
 
 // Run team region on device.
 int32_t DeviceTy::run_team_region(void *TgtEntryPtr, void **TgtVarsPtr,
-    ptrdiff_t *TgtOffsets, int32_t TgtVarsSize, int32_t NumTeams,
+    ptrdiff_t *TgtOffsets, int64_t *TgtArgTypes, int32_t TgtVarsSize, int32_t NumTeams,
     int32_t ThreadLimit, uint64_t LoopTripCount) {
-  return RTL->run_team_region(RTLDeviceID, TgtEntryPtr, TgtVarsPtr, TgtOffsets,
+  return RTL->run_team_region(RTLDeviceID, TgtEntryPtr, TgtVarsPtr, TgtOffsets, TgtArgTypes,
       TgtVarsSize, NumTeams, ThreadLimit, LoopTripCount);
 }
 

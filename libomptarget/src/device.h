@@ -148,9 +148,9 @@ struct DeviceTy {
   int32_t data_retrieve(void *HstPtrBegin, void *TgtPtrBegin, int64_t Size);
 
   int32_t run_region(void *TgtEntryPtr, void **TgtVarsPtr,
-      ptrdiff_t *TgtOffsets, int32_t TgtVarsSize);
+      ptrdiff_t *TgtOffsets, int64_t *TgtArgTypes, int32_t TgtVarsSize);
   int32_t run_team_region(void *TgtEntryPtr, void **TgtVarsPtr,
-      ptrdiff_t *TgtOffsets, int32_t TgtVarsSize, int32_t NumTeams,
+      ptrdiff_t *TgtOffsets, int64_t *TgtArgTypes, int32_t TgtVarsSize, int32_t NumTeams,
       int32_t ThreadLimit, uint64_t LoopTripCount);
 
 private:

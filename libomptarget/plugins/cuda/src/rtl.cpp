@@ -623,7 +623,7 @@ int32_t __tgt_rtl_data_delete(int32_t device_id, void *tgt_ptr) {
 }
 
 int32_t __tgt_rtl_run_target_team_region(int32_t device_id, void *tgt_entry_ptr,
-    void **tgt_args, ptrdiff_t *tgt_offsets, int32_t arg_num, int32_t team_num,
+    void **tgt_args, ptrdiff_t *tgt_offsets, int64_t *tgt_arg_types, int32_t arg_num, int32_t team_num,
     int32_t thread_limit, uint64_t loop_tripcount) {
   // Set the context we are using.
   CUresult err = cuCtxSetCurrent(DeviceInfo.Contexts[device_id]);
@@ -744,12 +744,12 @@ int32_t __tgt_rtl_run_target_team_region(int32_t device_id, void *tgt_entry_ptr,
 }
 
 int32_t __tgt_rtl_run_target_region(int32_t device_id, void *tgt_entry_ptr,
-    void **tgt_args, ptrdiff_t *tgt_offsets, int32_t arg_num) {
+    void **tgt_args, ptrdiff_t *tgt_offsets, int64_t *tgt_arg_types, int32_t arg_num) {
   // use one team and the default number of threads.
   const int32_t team_num = 1;
   const int32_t thread_limit = 0;
   return __tgt_rtl_run_target_team_region(device_id, tgt_entry_ptr, tgt_args,
-      tgt_offsets, arg_num, team_num, thread_limit, 0);
+      tgt_offsets, tgt_arg_types, arg_num, team_num, thread_limit, 0);
 }
 
 #ifdef __cplusplus

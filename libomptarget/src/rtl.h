@@ -33,9 +33,9 @@ struct RTLInfoTy {
   typedef int32_t(data_submit_ty)(int32_t, void *, void *, int64_t);
   typedef int32_t(data_retrieve_ty)(int32_t, void *, void *, int64_t);
   typedef int32_t(data_delete_ty)(int32_t, void *);
-  typedef int32_t(run_region_ty)(int32_t, void *, void **, ptrdiff_t *,
+  typedef int32_t(run_region_ty)(int32_t, void *, void **, ptrdiff_t *, int64_t*,
                                  int32_t);
-  typedef int32_t(run_team_region_ty)(int32_t, void *, void **, ptrdiff_t *,
+  typedef int32_t(run_team_region_ty)(int32_t, void *, void **, ptrdiff_t *, int64_t*,
                                       int32_t, int32_t, int32_t, uint64_t);
 
   int32_t Idx;                     // RTL index, index is the number of devices

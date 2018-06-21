@@ -530,6 +530,7 @@ int target(int64_t device_id, void *host_ptr, int32_t arg_num,
 
   std::vector<void *> tgt_args;
   std::vector<ptrdiff_t> tgt_offsets;
+  std::vector<int64_t> tgt_arg_types;
 
   // List of (first-)private arrays allocated for this target region
   std::vector<void *> fpArrays;
@@ -599,6 +600,7 @@ int target(int64_t device_id, void *host_ptr, int32_t arg_num,
     }
     tgt_args.push_back(TgtPtrBegin);
     tgt_offsets.push_back(TgtBaseOffset);
+    tgt_arg_types.push_back(arg_types[i]);
   }
 
   assert(tgt_args.size() == tgt_offsets.size() &&
@@ -615,11 +617,11 @@ int target(int64_t device_id, void *host_ptr, int32_t arg_num,
         DPxPTR(TargetTable->EntriesBegin[TM->Index].addr), TM->Index);
     if (IsTeamConstruct) {
       rc = Device.run_team_region(TargetTable->EntriesBegin[TM->Index].addr,
-          &tgt_args[0], &tgt_offsets[0], tgt_args.size(), team_num,
+          &tgt_args[0], &tgt_offsets[0], &tgt_arg_types[0], tgt_args.size(), team_num,
           thread_limit, ltc);
     } else {
       rc = Device.run_region(TargetTable->EntriesBegin[TM->Index].addr,
-          &tgt_args[0], &tgt_offsets[0], tgt_args.size());
+          &tgt_args[0], &tgt_offsets[0], &tgt_arg_types[0], tgt_args.size());
     }
   } else {
     DP("Errors occurred while obtaining target arguments, skipping kernel "

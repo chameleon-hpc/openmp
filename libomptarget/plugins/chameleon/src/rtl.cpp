@@ -162,14 +162,25 @@ int32_t __tgt_rtl_data_delete_mpi(int32_t device_id, void *tgt_ptr) {
 }
 
 int32_t __tgt_rtl_run_target_team_region_mpi(int32_t device_id, void *tgt_entry_ptr,
-    void **tgt_args, ptrdiff_t *tgt_offsets, int32_t arg_num, int32_t team_num,
+    void **tgt_args, ptrdiff_t *tgt_offsets, int64_t *tgt_arg_types, int32_t arg_num, int32_t team_num,
     int32_t thread_limit, uint64_t loop_tripcount /*not used*/) {
   // ignore team num and thread limit.
 
-  // handle also implicit mapped variables
-  for(int i = 0; i < arg_num; i++) {
-    chameleon_submit_implicit_data(tgt_args[i]);
-  }
+  // create task entry in chameleon table and save all relevant info
+  OffloadingTaskEntryTy tmp_task(tgt_entry_ptr, tgt_args, tgt_offsets, tgt_arg_types, arg_num);
+  chameleon_add_task(tmp_task);
+
+  // for(int i = 0; i < arg_num; i++) {
+  //   void *tmp_arg = tgt_args[i];
+  //   int64_t tmp_type = tgt_arg_types[i];
+
+  //   int64_t is_literal = (tmp_type & OMP_TGT_MAPTYPE_LITERAL);
+  //   int64_t is_implicit = (tmp_type & OMP_TGT_MAPTYPE_IMPLICIT);
+  //   int64_t is_to = (tmp_type & OMP_TGT_MAPTYPE_TO);
+  //   int64_t is_from = (tmp_type & OMP_TGT_MAPTYPE_FROM);
+
+  //   DP("Argument\n");
+  // }
 
   // TODO: create data structure that holds information about offloading job that can be executed locally or remotely
   // TODO: save data structure in chameleon data structure
@@ -361,7 +372,7 @@ int32_t __tgt_rtl_data_delete(int32_t device_id, void *tgt_ptr) {
 }
 
 int32_t __tgt_rtl_run_target_team_region(int32_t device_id, void *tgt_entry_ptr,
-    void **tgt_args, ptrdiff_t *tgt_offsets, int32_t arg_num, int32_t team_num,
+    void **tgt_args, ptrdiff_t *tgt_offsets, int64_t *tgt_arg_types, int32_t arg_num, int32_t team_num,
     int32_t thread_limit, uint64_t loop_tripcount /*not used*/) {
   // ignore team num and thread limit.
   DP("CHAMELEON - running target region...\n");
@@ -372,7 +383,7 @@ int32_t __tgt_rtl_run_target_team_region(int32_t device_id, void *tgt_entry_ptr,
   
   if(device_id == 1)
     return __tgt_rtl_run_target_team_region_mpi(device_id, tgt_entry_ptr,
-      tgt_args, tgt_offsets, arg_num, team_num,
+      tgt_args, tgt_offsets, tgt_arg_types, arg_num, team_num,
       thread_limit, loop_tripcount);
 
   // Use libffi to launch execution.
@@ -405,10 +416,10 @@ int32_t __tgt_rtl_run_target_team_region(int32_t device_id, void *tgt_entry_ptr,
 }
 
 int32_t __tgt_rtl_run_target_region(int32_t device_id, void *tgt_entry_ptr,
-    void **tgt_args, ptrdiff_t *tgt_offsets, int32_t arg_num) {
+    void **tgt_args, ptrdiff_t *tgt_offsets, int64_t *tgt_arg_types, int32_t arg_num) {
   // use one team and one thread.
   return __tgt_rtl_run_target_team_region(device_id, tgt_entry_ptr, tgt_args,
-      tgt_offsets, arg_num, 1, 1, 0);
+      tgt_offsets, tgt_arg_types, arg_num, 1, 1, 0);
 }
 
 #ifdef __cplusplus
