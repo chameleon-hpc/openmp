@@ -151,7 +151,7 @@ int32_t __tgt_rtl_data_submit_mpi(int32_t device_id, void *tgt_ptr, void *hst_pt
 
 int32_t __tgt_rtl_data_retrieve_mpi(int32_t device_id, void *hst_ptr, void *tgt_ptr, int64_t size) {
   // we don't need to copy anything here at this time because execution and transfering data back again happens later
-  // TODO: mark corresponding host pointer as output
+  // mark corresponding host pointer as output not necessary because we added the parameter types in interface now
   return OFFLOAD_SUCCESS;
 }
 
@@ -169,18 +169,6 @@ int32_t __tgt_rtl_run_target_team_region_mpi(int32_t device_id, void *tgt_entry_
   // create task entry in chameleon table and save all relevant info
   OffloadingTaskEntryTy tmp_task(tgt_entry_ptr, tgt_args, tgt_offsets, tgt_arg_types, arg_num);
   chameleon_add_task(tmp_task);
-
-  // for(int i = 0; i < arg_num; i++) {
-  //   void *tmp_arg = tgt_args[i];
-  //   int64_t tmp_type = tgt_arg_types[i];
-
-  //   int64_t is_literal = (tmp_type & OMP_TGT_MAPTYPE_LITERAL);
-  //   int64_t is_implicit = (tmp_type & OMP_TGT_MAPTYPE_IMPLICIT);
-  //   int64_t is_to = (tmp_type & OMP_TGT_MAPTYPE_TO);
-  //   int64_t is_from = (tmp_type & OMP_TGT_MAPTYPE_FROM);
-
-  //   DP("Argument\n");
-  // }
 
   // TODO: create data structure that holds information about offloading job that can be executed locally or remotely
   // TODO: save data structure in chameleon data structure
