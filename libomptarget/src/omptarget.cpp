@@ -514,6 +514,22 @@ int target(int64_t device_id, void *host_ptr, int32_t arg_num,
   TrlTblMtx.lock();
   assert(TM->Table->TargetsTable.size() > (size_t)device_id &&
          "Not expecting a device ID outside the table's bounds!");
+  
+  // Output some more info about target
+  // for(int tmpi = 0; tmpi < TM->Table->TargetsTable.size(); tmpi++)
+  // {
+  //   DP("Target Table for Device %d\n", tmpi);
+  //   __tgt_target_table *TargetTable = TM->Table->TargetsTable[tmpi];
+
+  //   if(TargetTable) {
+  //     __tgt_offload_entry *begin = TargetTable->EntriesBegin;
+  //     __tgt_offload_entry *end = TargetTable->EntriesEnd;
+  //     __tgt_offload_entry *cur = begin;
+  //     for (uint32_t i = 0; cur < end; ++cur, ++i) {
+  //       DP("-- Entry %s (" DPxMOD ")\n", cur->name, DPxPTR(cur->addr));
+  //     }
+  //   }
+  // }
   __tgt_target_table *TargetTable = TM->Table->TargetsTable[device_id];
   TrlTblMtx.unlock();
   assert(TargetTable && "Global data has not been mapped\n");
