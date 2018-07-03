@@ -87,6 +87,7 @@ static int InitLibrary(DeviceTy& Device) {
                              *EntryDeviceEnd = TargetTable->EntriesEnd;
          CurrDeviceEntry != EntryDeviceEnd;
          CurrDeviceEntry++, CurrHostEntry++) {
+             DP("Dev: %d - Set entry points target: %s (" DPxMOD "), source: %s (" DPxMOD ")\n", device_id, CurrDeviceEntry->name, DPxPTR(CurrDeviceEntry->addr), CurrHostEntry->name, DPxPTR(CurrHostEntry->addr));
       if (CurrDeviceEntry->size != 0) {
         // has data.
         assert(CurrDeviceEntry->size == CurrHostEntry->size &&
@@ -467,6 +468,7 @@ int target(int64_t device_id, void *host_ptr, int32_t arg_num,
 
   // Find the table information in the map or look it up in the translation
   // tables.
+  DP("Try to find entry point for host pointer " DPxMOD "\n", DPxPTR(host_ptr));
   TableMap *TM = 0;
   TblMapMtx.lock();
   HostPtrToTableMapTy::iterator TableMapIt = HostPtrToTableMap.find(host_ptr);

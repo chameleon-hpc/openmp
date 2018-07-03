@@ -144,7 +144,7 @@ void *__tgt_rtl_data_alloc_mpi(int32_t device_id, int64_t size, void *hst_ptr) {
 }
 
 int32_t __tgt_rtl_data_submit_mpi(int32_t device_id, void *tgt_ptr, void *hst_ptr, int64_t size) {
-  // save to chameleon data structure
+  // save in chameleon data structures
   int32_t result = chameleon_submit_data(tgt_ptr, hst_ptr, size);
   return OFFLOAD_SUCCESS;
 }
@@ -165,13 +165,11 @@ int32_t __tgt_rtl_run_target_team_region_mpi(int32_t device_id, void *tgt_entry_
     void **tgt_args, ptrdiff_t *tgt_offsets, int64_t *tgt_arg_types, int32_t arg_num, int32_t team_num,
     int32_t thread_limit, uint64_t loop_tripcount /*not used*/) {
   // ignore team num and thread limit.
-
+  // create data structure that holds information about offloading job that can be executed locally or remotely
+  
   // create task entry in chameleon table and save all relevant info
   OffloadingTaskEntryTy tmp_task(tgt_entry_ptr, tgt_args, tgt_offsets, tgt_arg_types, arg_num);
   chameleon_add_task(tmp_task);
-
-  // TODO: create data structure that holds information about offloading job that can be executed locally or remotely
-  // TODO: save data structure in chameleon data structure
 
   return OFFLOAD_SUCCESS;
 }
@@ -189,8 +187,6 @@ int32_t __tgt_rtl_is_valid_binary(__tgt_device_image *image) {
 }
 
 int32_t __tgt_rtl_number_of_devices() { 
-  // dummy call to test if linking worked
-  chameleon_finalize();
 	return NUMBER_OF_DEVICES; 
 }
 
