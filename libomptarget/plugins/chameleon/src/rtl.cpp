@@ -168,7 +168,7 @@ int32_t __tgt_rtl_run_target_team_region_mpi(int32_t device_id, void *tgt_entry_
   // create data structure that holds information about offloading job that can be executed locally or remotely
   
   // create task entry in chameleon table and save all relevant info
-  OffloadingTaskEntryTy tmp_task(tgt_entry_ptr, tgt_args, tgt_offsets, tgt_arg_types, arg_num);
+  TargetTaskEntryTy *tmp_task = new TargetTaskEntryTy(tgt_entry_ptr, tgt_args, tgt_offsets, tgt_arg_types, arg_num);
   chameleon_add_task(tmp_task);
 
   return OFFLOAD_SUCCESS;
