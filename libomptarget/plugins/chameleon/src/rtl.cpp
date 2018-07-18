@@ -67,7 +67,7 @@ struct FuncOrGblEntryTy {
 
 /// Class containing all the device information.
 class RTLDeviceInfoTy {
-  std::vector<FuncOrGblEntryTy> FuncGblEntries;
+  std::vector<std::list<FuncOrGblEntryTy>> FuncGblEntries;
 
 public:
   std::list<DynLibTy> DynLibs;
@@ -77,7 +77,8 @@ public:
                           __tgt_offload_entry *end) {
     assert(device_id < (int32_t)FuncGblEntries.size() &&
            "Unexpected device id!");
-    FuncOrGblEntryTy &E = FuncGblEntries[device_id];
+    FuncGblEntries[device_id].emplace_back();
+    FuncOrGblEntryTy &E = FuncGblEntries[device_id].back();
 
     E.Table.EntriesBegin = begin;
     E.Table.EntriesEnd = end;
@@ -87,7 +88,7 @@ public:
   bool findOffloadEntry(int32_t device_id, void *addr) {
     assert(device_id < (int32_t)FuncGblEntries.size() &&
            "Unexpected device id!");
-    FuncOrGblEntryTy &E = FuncGblEntries[device_id];
+    FuncOrGblEntryTy &E = FuncGblEntries[device_id].back();
 
     for (__tgt_offload_entry *i = E.Table.EntriesBegin, *e = E.Table.EntriesEnd;
          i < e; ++i) {
@@ -102,9 +103,29 @@ public:
   __tgt_target_table *getOffloadEntriesTable(int32_t device_id) {
     assert(device_id < (int32_t)FuncGblEntries.size() &&
            "Unexpected device id!");
-    FuncOrGblEntryTy &E = FuncGblEntries[device_id];
+    FuncOrGblEntryTy &E = FuncGblEntries[device_id].back();
 
     return &E.Table;
+  }
+
+  int getCurrentSizeForDevice(int32_t device_id) {
+      return FuncGblEntries[device_id].size();
+  }
+
+  void getImgIdxAndOffset(int32_t device_id, void *addr, int *img_idx, ptrdiff_t *diff) {
+      std::list<FuncOrGblEntryTy>::iterator it;
+      int cur_idx = 0;
+
+      for(it = FuncGblEntries[device_id].begin(), cur_idx = 0; it != FuncGblEntries[device_id].end(); it++, cur_idx++) {
+          FuncOrGblEntryTy &E = *it;
+          for (__tgt_offload_entry *i = E.Table.EntriesBegin, *e = E.Table.EntriesEnd;
+                i < e; ++i) {
+            if (i->addr == addr)
+                *img_idx = cur_idx;
+                *diff = (intptr_t) addr - (intptr_t) E.Table.EntriesBegin[0].addr;
+                return;
+            }
+      }
   }
 
   RTLDeviceInfoTy(int32_t num_devices) {
@@ -168,7 +189,13 @@ int32_t __tgt_rtl_run_target_team_region_mpi(int32_t device_id, void *tgt_entry_
   // create data structure that holds information about offloading job that can be executed locally or remotely
   
   // create task entry in chameleon table and save all relevant info
+  int img_idx = 0;
+  ptrdiff_t diff = 0;
+  DeviceInfo.getImgIdxAndOffset(device_id, tgt_entry_ptr, &img_idx, &diff);
+
   TargetTaskEntryTy *tmp_task = new TargetTaskEntryTy(tgt_entry_ptr, tgt_args, tgt_offsets, tgt_arg_types, arg_num);
+  tmp_task->idx_image = img_idx;
+  tmp_task->entry_image_offset = diff;
   chameleon_add_task(tmp_task);
 
   return OFFLOAD_SUCCESS;
@@ -313,6 +340,10 @@ __tgt_target_table *__tgt_rtl_load_binary(int32_t device_id,
   DP("Entries table range is (" DPxMOD ")->(" DPxMOD ")\n",
       DPxPTR(entries_begin), DPxPTR(entries_end));
   DeviceInfo.createOffloadTable(device_id, entries_begin, entries_end);
+  
+  int idx_image = DeviceInfo.getCurrentSizeForDevice(device_id)-1;
+  intptr_t base_address = (intptr_t) entries_begin[0].addr;
+  chameleon_set_image_base_address( idx_image, base_address);
 
   elf_end(e);
 
