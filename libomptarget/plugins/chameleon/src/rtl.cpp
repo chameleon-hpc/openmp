@@ -160,6 +160,7 @@ extern "C" {
 void *__tgt_rtl_data_alloc_mpi(int32_t device_id, int64_t size, void *hst_ptr) {
   // normally we don't need to do anything here because we are focusing on the host pointers when transfering
   void *ptr = malloc(size);
+  chameleon_incr_mem_alloc(size);
   return ptr;
   //return NULL;
 }
@@ -178,7 +179,9 @@ int32_t __tgt_rtl_data_retrieve_mpi(int32_t device_id, void *hst_ptr, void *tgt_
 
 int32_t __tgt_rtl_data_delete_mpi(int32_t device_id, void *tgt_ptr) {
   // normally nothing to do here
-  free(tgt_ptr);
+  // maybe need to free in library after task creation to avoid problems
+  // free(tgt_ptr);
+  chameleon_remove_data(tgt_ptr);
   return OFFLOAD_SUCCESS;
 }
 
