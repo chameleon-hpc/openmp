@@ -196,7 +196,7 @@ int32_t __tgt_rtl_run_target_team_region_mpi(int32_t device_id, void *tgt_entry_
   ptrdiff_t diff = 0;
   DeviceInfo.getImgIdxAndOffset(device_id, tgt_entry_ptr, &img_idx, &diff);
 
-  TargetTaskEntryTy *tmp_task = CreateTargetTaskEntryTy(tgt_entry_ptr, tgt_args, tgt_offsets, tgt_arg_types, arg_num);
+  cham_migratable_task_t *tmp_task = create_migratable_task(tgt_entry_ptr, tgt_args, tgt_offsets, tgt_arg_types, arg_num);
   chameleon_set_img_idx_offset(tmp_task, img_idx, diff);
   chameleon_add_task(tmp_task);
 
