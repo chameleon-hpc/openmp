@@ -179,7 +179,7 @@ int32_t __tgt_rtl_data_retrieve_mpi(int32_t device_id, void *hst_ptr, void *tgt_
 
 int32_t __tgt_rtl_data_delete_mpi(int32_t device_id, void *tgt_ptr) {
   // normally nothing to do here
-  // maybe need to free in library after task creation to avoid problems
+  // need to free in library after task creation to avoid problems
   // free(tgt_ptr);
   chameleon_free_data(tgt_ptr);
   return OFFLOAD_SUCCESS;
